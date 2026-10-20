@@ -2049,9 +2049,12 @@ local function BuildUI()
 
 	-- minimize: collapse the window to just the title bar + progress bar
 	local minimize = CreateFrame("Button", nil, ui)
-	minimize:SetSize(20, 20)
+	-- Match the Close button's hit area, not the glyph's: a 20px target next to
+	-- the 32px Close button is easy to miss.
+	local closeWidth, closeHeight = close:GetWidth() or 0, close:GetHeight() or 0
+	minimize:SetSize(closeWidth > 0 and closeWidth or 32, closeHeight > 0 and closeHeight or 32)
 	minimize:SetPoint("TOPRIGHT", close, "TOPLEFT", 2, 0)
-	local minGlyph = minimize:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+	local minGlyph = minimize:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
 	minGlyph:SetText("-")
 	minGlyph:SetPoint("CENTER")
 	minimize:SetScript("OnEnter", function() minGlyph:SetTextColor(1, 1, 0.4) end)
