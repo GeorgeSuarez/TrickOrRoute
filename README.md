@@ -42,7 +42,7 @@ doesn't zig-zag between inns.
 - **Per-character progress** — the current stop, manual skips and folded
   sections stay per character (`SavedVariablesPerCharacter`), since candy
   buckets are one-time quests and a character can be on either faction.
-- **Polished single-window UI** — a progress bar that shades from ember to gold,
+- **Polished single-window UI** — an orange progress bar,
   live distance-to-stop readout (green when you're in auto-advance range), a
   region dropdown that names the current region and greens out finished ones,
   action tooltips, and a checklist view with per-region "N left" counts, foldable

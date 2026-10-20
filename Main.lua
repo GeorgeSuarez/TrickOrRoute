@@ -2072,7 +2072,7 @@ local function BuildUI()
 	end)
 	ui.minimizeButton = minimize
 
-	-- header progress bar (ember -> gold as the route fills up)
+	-- header progress bar (orange as the route fills up)
 	local progress = CreateFrame("StatusBar", nil, ui)
 	progress:SetSize(372, 16)
 	progress:SetPoint("TOPLEFT", 16, -44)
@@ -2451,8 +2451,8 @@ function TR:RefreshUI()
 	local done, total = TR:Counts()
 	local frac = (total > 0) and (done / total) or 0
 	ui.progress:SetValue(frac)
-	-- shade the bar from ember to gold as the route fills up
-	ui.progress:SetStatusBarColor(0.6 + 0.4 * frac, 0.25 + 0.42 * frac, 0.08 + 0.02 * frac)
+	-- keep the fill a warm orange at every percentage, rather than shading to gold
+	ui.progress:SetStatusBarColor(1, 0.55, 0.12)
 	ui.progress.text:SetText(string.format("%d / %d buckets visited  (%d%%)", done, total,
 		math.floor(frac * 100 + 0.5)))
 
