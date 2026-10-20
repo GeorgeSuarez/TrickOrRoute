@@ -543,13 +543,13 @@ function TR:OptimizeZoneRuns()
 			if not record then
 				local costs = ZoneCosts(run)
 				if costs then
-					local before = 0
+					local before, priced = 0, true
 					for k = 1, n - 1 do
 						local d = costs[k][k + 1]
-						if not d or d >= Pathing.INF then before = nil break end
+						if not d or d >= Pathing.INF then priced = false break end
 						before = before + d
 					end
-					if before then
+					if priced then
 						record = { before = before, after = before }
 						local candidate, total = Pathing.Order(costs, n, 1, n)
 						if candidate and #candidate == n and total < before - 1e-9 then
@@ -1703,7 +1703,7 @@ function DrawMiniRoute() -- assigns the forward-declared local
 		local prevPx, prevPy = 0, 0 -- the player is the centre
 		for _, stop in ipairs(legs) do
 			local bx, by = toPixels(stop)
-			if bx then
+			if bx and by then
 				for _, part in ipairs(MiniClipShape(prevPx, prevPy, bx, by, radius, quarters)) do
 					MiniRun(frame, part[1], part[2], part[3], part[4], 1, 0.55, 0.12, 0.9, 2.5)
 				end

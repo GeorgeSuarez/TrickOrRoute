@@ -1,0 +1,5 @@
+# typos spell-checker configuration.
+# `thar` is part of real World of Warcraft place names (Rusza'thar Reach,
+# Rusza'thar Rampart in Ohn'ahran Plains), not a misspelling of "than"/"that".
+[default.extend-words]
+thar = "thar"

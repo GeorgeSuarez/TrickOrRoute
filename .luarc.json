@@ -1,0 +1,27 @@
+{
+	"$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/refs/heads/master/setting/schema.json",
+	"runtime": {
+		"version": "Lua 5.1"
+	},
+	"workspace": {
+		"library": ["."],
+		"checkThirdParty": false
+	},
+	"diagnostics": {
+		"globals": [
+			"CreateFrame", "UIParent", "Minimap", "WorldMapFrame", "GameTooltip", "UISpecialFrames",
+			"SlashCmdList", "C_Item", "C_Map", "C_QuestLog", "C_SuperTrack", "C_Timer", "C_Reputation",
+			"C_TaxiMap", "GetItemIcon", "GetItemCount", "UnitFactionGroup", "GetPlayerFacing",
+			"IsShiftKeyDown", "IsControlKeyDown", "IsIndoors", "GetCursorPosition", "PlaySound",
+			"SOUNDKIT", "Enum", "Settings", "InterfaceOptions_AddCategory",
+			"InterfaceOptionsFrame_OpenToCategory", "GetCVar", "date", "MAP_PIN_HYPERLINK",
+			"ChatFrameUtil", "ChatEdit_InsertLink", "ChatFrame_OpenChat", "wipe", "tinsert",
+			"hooksecurefunc", "CreateVector2D", "GetMinimapShape", "TomTom",
+			"UIPanelCloseButton", "UIPanelButtonTemplate", "UICheckButtonTemplate", "BackdropTemplate",
+			"UIPanelScrollFrameTemplate", "OptionsSliderTemplate", "GameFontHighlight",
+			"GameFontHighlightSmall", "GameFontHighlightLarge", "GameFontNormal", "GameFontNormalLarge",
+			"GameFontNormalSmall", "GameFontDisable", "GameFontDisableSmall"
+		],
+		"disable": ["lowercase-global"]
+	}
+}

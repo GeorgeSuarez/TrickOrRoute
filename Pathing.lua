@@ -14,7 +14,7 @@
 -- on its own. Main.lua supplies the graph: the buckets are the nodes and the
 -- distance between two is the straight line in world yards.
 
-local ADDON_NAME, TR = ...
+local _, TR = ...
 
 local Pathing = {}
 TR.Pathing = Pathing
@@ -78,12 +78,12 @@ function Pathing.Dijkstra(graph, start, targets)
 				if left <= 0 then break end
 			end
 			for _, edge in ipairs(graph[node] or {}) do
-				local nd = d + edge.cost
+				local newDist = d + edge.cost
 				local known = dist[edge.to]
-				if known == nil or nd < known then
-					dist[edge.to] = nd
+				if known == nil or newDist < known then
+					dist[edge.to] = newDist
 					prev[edge.to] = node
-					heapPush(heap, { nd, edge.to })
+					heapPush(heap, { newDist, edge.to })
 				end
 			end
 		end
@@ -197,10 +197,10 @@ local function exactFrom(cost, n, start, finish)
 				for k = 1, m do
 					if math.floor(mask / pow[k]) % 2 == 0 then
 						local to = middle[k]
-						local nd = here + costAt(cost, middle[j], to)
+						local newDist = here + costAt(cost, middle[j], to)
 						local key = (mask + pow[k]) * width + to
-						if nd < (best[key] or Pathing.INF) then
-							best[key], prev[key] = nd, middle[j]
+						if newDist < (best[key] or Pathing.INF) then
+							best[key], prev[key] = newDist, middle[j]
 						end
 					end
 				end
