@@ -2061,25 +2061,16 @@ local function BuildUI()
 	local close = CreateFrame("Button", nil, ui, "UIPanelCloseButton")
 	close:SetPoint("TOPRIGHT", -4, -4)
 
-	-- minimize: collapse the window to just the title bar + progress bar
-	local minimize = CreateFrame("Button", nil, ui)
-	-- Match the Close button's hit area, not the glyph's: a 20px target next to
-	-- the 32px Close button is easy to miss.
-	local closeWidth, closeHeight = close:GetWidth() or 0, close:GetHeight() or 0
-	minimize:SetSize(closeWidth > 0 and closeWidth or 32, closeHeight > 0 and closeHeight or 32)
+	-- minimize: the same red button family as the close X, with the condense
+	-- (and, once collapsed, expand) icon instead of an invisible glyph button.
+	local minimize = CreateFrame("Button", nil, ui, "UIPanelHideButtonNoScripts")
 	minimize:SetPoint("TOPRIGHT", close, "TOPLEFT", 2, 0)
-	local minGlyph = minimize:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-	minGlyph:SetText("-")
-	minGlyph:SetPoint("CENTER")
-	minimize:SetScript("OnEnter", function() minGlyph:SetTextColor(1, 1, 0.4) end)
-	minimize:SetScript("OnLeave", function() minGlyph:SetTextColor(1, 1, 1) end)
 	minimize:SetScript("OnClick", function()
 		ui.minimized = not ui.minimized
 		TR.db.minimized = ui.minimized
 		TR:RefreshUI()
 	end)
 	ui.minimizeButton = minimize
-	ui.minimizeGlyph = minGlyph
 
 	-- header progress bar (ember -> gold as the route fills up)
 	local progress = CreateFrame("StatusBar", nil, ui)
@@ -2469,7 +2460,9 @@ function TR:RefreshUI()
 	local minimized = ui.minimized and true or false
 	local showList = not minimized and (ui.showList and true or false) or false
 	ui:SetHeight(minimized and 100 or (ui.fullHeight or 520))
-	ui.minimizeGlyph:SetText(minimized and "+" or "-")
+	ui.minimizeButton:SetNormalAtlas(minimized and "RedButton-Expand" or "RedButton-Condense")
+	ui.minimizeButton:SetPushedAtlas(minimized and "RedButton-Expand-Pressed" or "RedButton-Condense-Pressed")
+	ui.minimizeButton:SetDisabledAtlas(minimized and "RedButton-Expand-Disabled" or "RedButton-Condense-disabled")
 	ui.listScroll:SetShown(showList)
 	ui.listBar:SetShown(showList)
 	ui.listButton:SetShown(not minimized)
