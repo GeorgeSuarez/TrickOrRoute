@@ -2283,6 +2283,28 @@ local function BuildUI()
 	footer:SetPoint("BOTTOMLEFT", 12, 11)
 	ui.footer = footer
 
+	-- Paint the footer's treat count. RefreshUI calls this; the BAG_UPDATE hook
+	-- calls it directly (see below) so looting updates the number without a
+	-- full repaint. The count is remembered so the hook can skip no-op repaints.
+	local lastTreats
+	function TR:UpdateTreatFooter()
+		local treats = TreatCount(TRICKY_TREAT_ITEM_ID)
+		lastTreats = treats
+		local icon = TreatIcon(TRICKY_TREAT_ITEM_ID)
+		local iconTag = icon and ("|T" .. icon .. ":15:15:0:0|t") or ""
+		local suffix = TR.db.autoAdvance and "" or "  |cff808080(auto-advance off)|r"
+		footer:SetText(string.format("%s Tricky Treats: %d%s", iconTag, treats, suffix))
+	end
+
+	-- BAG_UPDATE fires for every bag change (looting, buying, crafting), so the
+	-- handler stays as cheap as one item count and a comparison; it only paints
+	-- when the number actually moved and the window is up to see it.
+	TR.treatWatcher = function()
+		if not (TR.ui and TR.ui.footer and TR.ui.footer:IsShown()) then return end
+		local treats = TreatCount(TRICKY_TREAT_ITEM_ID)
+		if treats ~= lastTreats then TR:UpdateTreatFooter() end
+	end
+
 	-- list view
 	local listScroll = CreateFrame("ScrollFrame", nil, ui, "UIPanelScrollFrameTemplate")
 	listScroll:SetPoint("TOPLEFT", 16, cardTop)
@@ -2481,11 +2503,7 @@ function TR:RefreshUI()
 	end
 
 	-- footer: treat count with the candy icon
-	local treats = TreatCount(TRICKY_TREAT_ITEM_ID)
-	local icon = TreatIcon(TRICKY_TREAT_ITEM_ID)
-	local iconTag = icon and ("|T" .. icon .. ":15:15:0:0|t") or ""
-	local suffix = TR.db.autoAdvance and "" or "  |cff808080(auto-advance off)|r"
-	ui.footer:SetText(string.format("%s Tricky Treats: %d%s", iconTag, treats, suffix))
+	TR:UpdateTreatFooter()
 
 	-- region strip: green out completed regions, highlight the current one
 	local regions = TrickOrRouteData and TrickOrRouteData.regions or {}
@@ -2543,6 +2561,7 @@ eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 eventFrame:RegisterEvent("QUEST_TURNED_IN")
 eventFrame:RegisterEvent("CHAT_MSG_LOOT")
+eventFrame:RegisterEvent("BAG_UPDATE")
 
 eventFrame:SetScript("OnEvent", function(_, event, ...)
 	if event == "ADDON_LOADED" then
@@ -2588,6 +2607,11 @@ eventFrame:SetScript("OnEvent", function(_, event, ...)
 	elseif event == "CHAT_MSG_LOOT" then
 		local msg = ...
 		TR:OnLoot(msg)
+	elseif event == "BAG_UPDATE" then
+		-- Keep the footer's Tricky Treat count current while looting. The
+		-- watcher (built with the UI) compares the count first, so a burst of
+		-- bag events costs one item count each, not a repaint.
+		if TR.treatWatcher then TR.treatWatcher() end
 	end
 end)
 
