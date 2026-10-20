@@ -20,7 +20,8 @@
 			"UIPanelCloseButton", "UIPanelButtonTemplate", "UICheckButtonTemplate", "BackdropTemplate",
 			"UIPanelScrollFrameTemplate", "OptionsSliderTemplate", "GameFontHighlight",
 			"GameFontHighlightSmall", "GameFontHighlightLarge", "GameFontNormal", "GameFontNormalLarge",
-			"GameFontNormalSmall", "GameFontDisable", "GameFontDisableSmall"
+			"GameFontNormalSmall", "GameFontDisable", "GameFontDisableSmall",
+			"GameTooltip_SetTitle", "GameTooltip_AddNormalLine"
 		],
 		"disable": ["lowercase-global"]
 	}

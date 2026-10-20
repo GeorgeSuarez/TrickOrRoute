@@ -44,7 +44,7 @@ doesn't zig-zag between inns.
   buckets are one-time quests and a character can be on either faction.
 - **Polished single-window UI** — a progress bar that shades from ember to gold,
   live distance-to-stop readout (green when you're in auto-advance range), a
-  region strip that highlights where you are (and greens out finished regions),
+  region dropdown that names the current region and greens out finished ones,
   action tooltips, and a checklist view with per-region "N left" counts, foldable
   region sections, and a minimize button that collapses the window to a compact
   toolbar.

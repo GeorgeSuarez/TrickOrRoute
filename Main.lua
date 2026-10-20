@@ -2094,57 +2094,59 @@ local function BuildUI()
 	progress.text:SetPoint("CENTER")
 	ui.progress = progress
 
-	-- region strip: full region names, measured and flowed into as many rows
-	-- as the text needs (the old 52px abbreviations weren't self-explanatory)
-	local regionButtons = {}
+	-- region picker: one dropdown instead of a strip of buttons. The menu is
+	-- built when it opens (and refreshed on route changes), so the remaining
+	-- counts and the current region are always current.
 	local regions = TrickOrRouteData and TrickOrRouteData.regions or {}
-	local stripLeft, stripTop, stripLimit = 16, -70, 372
-	local btnH, gapX, gapY = 22, 8, 6
-	local cursorX, cursorY = 0, 0
-	for i, region in ipairs(regions) do
-		local b = CreateFrame("Button", nil, ui, "UIPanelButtonTemplate")
-		b:SetHeight(btnH)
-		b:SetText(region.name)
-		-- measure the rendered label so long names get the width they need
-		local fs = b:GetFontString()
-		local textWidth = (fs and fs.GetStringWidth and fs:GetStringWidth()) or 100
-		local width = math.max(56, textWidth + 22)
-		if cursorX > 0 and cursorX + width > stripLimit then
-			cursorX = 0
-			cursorY = cursorY - (btnH + gapY)
+	local stripTop = -70
+	local dropdown = CreateFrame("DropdownButton", nil, ui, "WowStyle1DropdownTemplate")
+	dropdown:SetWidth(372)
+	dropdown:SetPoint("TOPLEFT", 16, stripTop)
+	dropdown:SetDefaultText("Jump to region")
+	dropdown:SetupMenu(function(_, rootDescription)
+		rootDescription:CreateTitle("Jump to region")
+		local current = TR:CurrentStop()
+		-- One pass over the route, not one per region: the menu is regenerated on
+		-- every RefreshUI, and IsDone pings the quest log.
+		local remainingByRegion = {}
+		for _, s in ipairs(TR.route or {}) do
+			if not TR:IsDone(s) then
+				remainingByRegion[s.regionKey] = (remainingByRegion[s.regionKey] or 0) + 1
+			end
 		end
-		b:SetWidth(width)
-		b:SetPoint("TOPLEFT", stripLeft + cursorX, stripTop + cursorY)
-		cursorX = cursorX + width + gapX
-		b:SetScript("OnClick", function() TR:JumpToRegion(region.key) end)
-		b:SetScript("OnEnter", function(self)
-			local remaining = 0
-			for _, s in ipairs(TR.route or {}) do
-				if s.regionKey == region.key and not TR:IsDone(s) then remaining = remaining + 1 end
+		for _, region in ipairs(regions) do
+			local remaining = remainingByRegion[region.key] or 0
+			local allDone = remaining == 0
+			local label = region.name
+			if allDone then
+				label = "|cff6fdf6f" .. label .. "|r"
+			elseif current and current.regionKey == region.key then
+				label = "|cffffd100" .. label .. "|r"
 			end
-			GameTooltip:SetOwner(self, "ANCHOR_TOP")
-			GameTooltip:AddLine(region.name, 1, 0.8, 0.4)
-			if remaining > 0 then
-				GameTooltip:AddLine(string.format("%d bucket%s left", remaining,
-					(remaining == 1) and "" or "s"), 1, 1, 1)
-			else
-				GameTooltip:AddLine("All visited!", 0.4, 1, 0.4)
-			end
-			GameTooltip:Show()
-		end)
-		b:SetScript("OnLeave", function() GameTooltip:Hide() end)
-		b.regionKey = region.key
-		b.regionName = region.name
-		regionButtons[i] = b
-	end
-	ui.regionButtons = regionButtons
+			local radio = rootDescription:CreateRadio(label,
+				function() return current and current.regionKey == region.key end,
+				function() TR:JumpToRegion(region.key) end)
+			-- SetTooltip takes an initializer, not a string.
+			radio:SetTooltip(function(tooltip)
+				GameTooltip_SetTitle(tooltip, region.name)
+				if allDone then
+					GameTooltip_AddNormalLine(tooltip, "All visited!")
+				else
+					GameTooltip_AddNormalLine(tooltip, ("%d bucket%s left"):format(
+						remaining, remaining == 1 and "" or "s"))
+				end
+			end)
+		end
+	end)
+	ui.regionDropdown = dropdown
 
-	-- everything below the strip follows its measured height
-	local stripHeight = -cursorY + btnH
+	-- one row for the picker, then the stop card
+	local stripHeight = dropdown:GetHeight()
+	if not stripHeight or stripHeight <= 0 then stripHeight = 32 end
 	local cardTop = stripTop - stripHeight - 10
 	local actionsTop = cardTop - 120 - 6
 	-- no region-hint line: the tour hint lives in the list headers only
-	local fullHeight = math.max(520, math.abs(actionsTop) + 90 + 6 + 103)
+	local fullHeight = math.max(440, math.abs(actionsTop) + 90 + 6 + 103)
 	ui.fullHeight = fullHeight
 
 	-- stop card
@@ -2469,7 +2471,7 @@ function TR:RefreshUI()
 	ui.listButton:SetText(showList and "Show route" or "Show full list")
 	ui.card:SetShown(not minimized and not showList)
 	for _, b in ipairs(ui.actionButtons) do b:SetShown(not minimized and not showList) end
-	for _, b in ipairs(ui.regionButtons) do b:SetShown(not minimized) end
+	ui.regionDropdown:SetShown(not minimized)
 	ui.autoCB:SetShown(not minimized)
 	if ui.tomCB then
 		ui.tomCB:SetShown(not minimized and TomTom ~= nil)
@@ -2509,30 +2511,9 @@ function TR:RefreshUI()
 	-- footer: treat count with the candy icon
 	TR:UpdateTreatFooter()
 
-	-- region strip: green out completed regions, highlight the current one
-	local regions = TrickOrRouteData and TrickOrRouteData.regions or {}
-	local currentRegion = currentStop and currentStop.regionKey or nil
-	for i, region in ipairs(regions) do
-		local b = ui.regionButtons[i]
-		if b then
-			local anyLeft = false
-			for _, s in ipairs(TR.route) do
-				if s.regionKey == region.key and not TR:IsDone(s) then
-					anyLeft = true
-					break
-				end
-			end
-			if not anyLeft then
-				b:SetText(("|cff6fdf6f%s|r"):format(b.regionName))
-				b:SetAlpha(0.55)
-			elseif region.key == currentRegion then
-				b:SetText(("|cffffd100%s|r"):format(b.regionName))
-				b:SetAlpha(1)
-			else
-				b:SetText(b.regionName)
-				b:SetAlpha(1)
-			end
-		end
+	-- refresh the region picker's selection text and its green/gold labels
+	if ui.regionDropdown and not minimized and not ui.regionDropdown:IsMenuOpen() then
+		ui.regionDropdown:GenerateMenu()
 	end
 
 	if ui.autoCB and ui.autoCB.Refresh then ui.autoCB:Refresh() end
