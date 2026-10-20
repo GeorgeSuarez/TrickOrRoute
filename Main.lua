@@ -2142,7 +2142,7 @@ local function BuildUI()
 	-- everything below the strip follows its measured height
 	local stripHeight = -cursorY + btnH
 	local cardTop = stripTop - stripHeight - 10
-	local actionsTop = cardTop - 110 - 6
+	local actionsTop = cardTop - 120 - 6
 	-- no region-hint line: the tour hint lives in the list headers only
 	local fullHeight = math.max(520, math.abs(actionsTop) + 90 + 6 + 103)
 	ui.fullHeight = fullHeight
@@ -2158,7 +2158,7 @@ local function BuildUI()
 	card:SetBackdropColor(0, 0, 0, 0.55)
 	card:SetPoint("TOPLEFT", 16, cardTop)
 	card:SetPoint("RIGHT", -16, 0)
-	card:SetHeight(110)
+	card:SetHeight(120)
 	ui.card = card
 
 	local stopName = card:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
@@ -2175,24 +2175,26 @@ local function BuildUI()
 	ui.arrow = cardArrow
 
 	local stopStatus = card:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-	stopStatus:SetPoint("TOPRIGHT", -46, -12)
+	-- Below the arrow, not beside the name: a long stop name would otherwise run
+	-- straight into "Stop 130 / 200".
+	stopStatus:SetPoint("TOPRIGHT", -12, -38)
 	ui.stopStatus = stopStatus
 
 	local stopInfo = card:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 	stopInfo:SetPoint("TOPLEFT", 12, -38)
-	stopInfo:SetPoint("RIGHT", -96, 0)
+	stopInfo:SetPoint("RIGHT", -110, 0)
 	stopInfo:SetJustifyH("LEFT")
 	stopInfo:SetWordWrap(false)
 	ui.stopInfo = stopInfo
 
 	-- live distance readout, refreshed by the ticker in StartTicker
 	local stopDist = card:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-	stopDist:SetPoint("TOPRIGHT", -12, -38)
+	stopDist:SetPoint("TOPRIGHT", -12, -56)
 	stopDist:SetJustifyH("RIGHT")
 	ui.dist = stopDist
 
 	local stopNote = card:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-	stopNote:SetPoint("TOPLEFT", 12, -62)
+	stopNote:SetPoint("TOPLEFT", 12, -76)
 	stopNote:SetPoint("RIGHT", -12, 0)
 	stopNote:SetJustifyH("LEFT")
 	stopNote:SetWordWrap(true)

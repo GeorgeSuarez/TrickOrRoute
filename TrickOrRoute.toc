@@ -2,7 +2,7 @@
 ## Title: TrickOrRoute
 ## Notes: An efficient guided tour of every Hallow's End candy bucket, with auto waypoints.
 ## Author: TrickOrRoute
-## Version: 1.7.1
+## Version: 1.7.2
 ## IconTexture: Interface\Icons\Achievement_Halloween_Candy_01
 ## AddonCompartmentText: TrickOrRoute
 ## AddonCompartmentIcon: Interface\Icons\Achievement_Halloween_Candy_01
