@@ -9,13 +9,18 @@
 --
 -- Data source: RouteData.lua (see header comment there); the search is in
 -- Pathing.lua.
+--
+-- WoW's Lua is 5.1, where unpack and math.atan2 are stdlib (5.3+ renamed them
+-- to table.unpack / math.atan); the checker flags them in every dialect, so
+-- that one category is disabled for this file.
+---@diagnostic disable: deprecated
 
 local ADDON_NAME, TR = ...
 
-local C_QuestLog = _G.C_QuestLog
-local C_Map = _G.C_Map
-local C_SuperTrack = _G.C_SuperTrack
-local C_Timer = _G.C_Timer
+local C_QuestLog = C_QuestLog
+local C_Map = C_Map
+local C_SuperTrack = C_SuperTrack
+local C_Timer = C_Timer
 local HANDFUL_OF_TREATS_ITEM_ID = 37586 -- item granted by every candy bucket
 local TRICKY_TREAT_ITEM_ID = 33226
 local AUTO_ADVANCE_RADIUS = 40 -- yards (default for db.autoRadius)
@@ -709,7 +714,7 @@ function TR:HeadingTo(stop)
 
 	local xScale, yScale = YardsPerUnit(map)
 	if not xScale then return nil end
-	local facing = _G.GetPlayerFacing and _G.GetPlayerFacing()
+	local facing = GetPlayerFacing and GetPlayerFacing()
 	if not facing then return nil end
 	-- North is up the map, so a target's northness is minus its y difference.
 	local east = (tx - px) * xScale
@@ -724,7 +729,7 @@ end
 function TR:SetWaypoint(stop, silent)
 	if not stop then return end
 	local title = string.format("%s (%s)", stop.label, stop.zone or "")
-	local tomTom = _G.TomTom
+	local tomTom = TomTom
 	if tomTom and TR.db.useTomTom and tomTom.AddWaypoint then
 		tomTom:AddWaypoint(stop.map, stop.x / 100, stop.y / 100, {
 			title = title,
@@ -752,10 +757,20 @@ end
 
 function TR:OpenMap(stop)
 	if not stop then return end
-	if _G.WorldMapFrame then
-		_G.WorldMapFrame:Show()
-		_G.WorldMapFrame:SetMapID(stop.map)
+	-- C_Map.OpenWorldMap (added 11.1.5) opens the map in one secure call, and
+	-- works even when the Blizzard_WorldMap frame hasn't been created yet (the
+	-- old Show + SetMapID pair silently did nothing in that case).
+	if C_Map.OpenWorldMap then
+		local ok = pcall(C_Map.OpenWorldMap, stop.map)
+		if ok then return end
 	end
+	local frame = WorldMapFrame
+	if frame and frame.SetMapID then
+		frame:Show()
+		pcall(frame.SetMapID, frame, stop.map)
+		return
+	end
+	print(ADDON_NAME, "- the world map is not available right now; try again.")
 end
 
 -- The game's own map-pin link (what the map's "share pin" produces).
@@ -767,7 +782,7 @@ local function MapPinLink(stop)
 	if not (ok and can) then return nil end
 	return ("|cffffff00|Hworldmap:%d:%d:%d|h[%s]|h|r"):format(
 		stop.map, math.floor(stop.x * 100 + 0.5), math.floor(stop.y * 100 + 0.5),
-		_G.MAP_PIN_HYPERLINK or "Map Pin Location")
+		MAP_PIN_HYPERLINK or "Map Pin Location")
 end
 
 -- Put a stop into the chat box as "Name - Zone (x, y) [Map Pin Location]",
@@ -777,10 +792,10 @@ function TR:ShareStop(stop)
 	local line = ("%s - %s (%.1f, %.1f)"):format(stop.label or "Candy Bucket", stop.zone or "?", stop.x, stop.y)
 	local pin = MapPinLink(stop)
 	if pin then line = line .. " " .. pin end
-	local util = _G.ChatFrameUtil
-	local insert = (util and util.InsertLink) or _G.ChatEdit_InsertLink
+	local util = ChatFrameUtil
+	local insert = (util and util.InsertLink) or ChatEdit_InsertLink
 	if insert and insert(line) then return end
-	local open = (util and util.OpenChat) or _G.ChatFrame_OpenChat
+	local open = (util and util.OpenChat) or ChatFrame_OpenChat
 	if open then open(line) end
 end
 
@@ -1645,11 +1660,11 @@ local function MiniFrame()
 		end
 	end)
 	frame:SetScript("OnEvent", function()
-		miniRoute.indoors = (_G.IsIndoors and _G.IsIndoors()) and true or false
+		miniRoute.indoors = (IsIndoors and IsIndoors()) and true or false
 	end)
 	frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 	miniRoute.frame = frame
-	miniRoute.indoors = (_G.IsIndoors and _G.IsIndoors()) and true or false
+	miniRoute.indoors = (IsIndoors and IsIndoors()) and true or false
 	return frame
 end
 
@@ -1677,13 +1692,13 @@ function DrawMiniRoute() -- assigns the forward-declared local
 	local width = Minimap.GetWidth and Minimap:GetWidth()
 	if not width or width <= 0 then return end
 	local radius = width / 2 - 3
-	local shape = type(_G.GetMinimapShape) == "function" and _G.GetMinimapShape() or "ROUND"
+	local shape = type(GetMinimapShape) == "function" and GetMinimapShape() or "ROUND"
 	local quarters = MINIMAP_SHAPES[shape] or MINIMAP_SHAPES.ROUND
 	local ypp = MiniYardsAcross() / width -- yards per pixel
 
 	-- The minimap turns with the player if they have set it to.
 	local angle = 0
-	if _G.GetCVar and _G.GetCVar("rotateMinimap") == "1" then angle = -(_G.GetPlayerFacing and _G.GetPlayerFacing() or 0) end
+	if GetCVar and GetCVar("rotateMinimap") == "1" then angle = -(GetPlayerFacing and GetPlayerFacing() or 0) end
 
 	local playerX, playerY = px * xScale, py * yScale
 	local function toPixels(stop)
@@ -1929,7 +1944,6 @@ local function BuildList()
 			frame:SetScript("OnEnter", function(self)
 				GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 				GameTooltip:AddLine(g.name or "", 1, 0.8, 0.4)
-				GameTooltip:AddLine(g.hint or "", 0.8, 0.8, 0.8, true)
 				if filtering then
 					GameTooltip:AddLine("Clear the search to fold sections.", 0.6, 0.6, 0.6, true)
 				else
@@ -2116,7 +2130,6 @@ local function BuildUI()
 			else
 				GameTooltip:AddLine("All visited!", 0.4, 1, 0.4)
 			end
-			GameTooltip:AddLine(region.hint, 0.8, 0.8, 0.8, true)
 			GameTooltip:Show()
 		end)
 		b:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -2130,8 +2143,8 @@ local function BuildUI()
 	local stripHeight = -cursorY + btnH
 	local cardTop = stripTop - stripHeight - 10
 	local actionsTop = cardTop - 110 - 6
-	local hintTop = actionsTop - 64 - 34
-	local fullHeight = math.max(520, math.abs(hintTop) + 44 + 103)
+	-- no region-hint line: the tour hint lives in the list headers only
+	local fullHeight = math.max(520, math.abs(actionsTop) + 90 + 6 + 103)
 	ui.fullHeight = fullHeight
 
 	-- stop card
@@ -2236,14 +2249,6 @@ local function BuildUI()
 		"Bulk-import them with the Paste addon.")
 
 	ui.actionButtons = { prev, waypoint, nextB, openMap, skip, dump }
-
-	-- region hint
-	local hint = ui:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-	hint:SetPoint("TOPLEFT", 16, hintTop)
-	hint:SetPoint("RIGHT", -16, 0)
-	hint:SetJustifyH("LEFT")
-	hint:SetWordWrap(true)
-	ui.hint = hint
 
 	-- options + footer: two measured checkbox rows + treats + list toggle
 	local rowA = CheckboxRow(ui, {
@@ -2462,11 +2467,10 @@ function TR:RefreshUI()
 	ui.listButton:SetText(showList and "Show route" or "Show full list")
 	ui.card:SetShown(not minimized and not showList)
 	for _, b in ipairs(ui.actionButtons) do b:SetShown(not minimized and not showList) end
-	ui.hint:SetShown(not minimized and not showList)
 	for _, b in ipairs(ui.regionButtons) do b:SetShown(not minimized) end
 	ui.autoCB:SetShown(not minimized)
 	if ui.tomCB then
-		ui.tomCB:SetShown(not minimized and _G.TomTom ~= nil)
+		ui.tomCB:SetShown(not minimized and TomTom ~= nil)
 	end
 	-- row B is not part of any anchored chain, hide it explicitly
 	for _, cb in ipairs({ ui.hudCB, ui.dockCB, ui.minimapCB }) do
@@ -2491,13 +2495,11 @@ function TR:RefreshUI()
 				ui.stopStatus:SetText(("|cffb0b0b0Stop %d / %d|r"):format(TR.pointer, #TR.route))
 			end
 			ui.stopNote:SetText(stop.note or "")
-			ui.hint:SetText(stop.hint or "")
 		else
 			ui.stopName:SetText("All done!")
 			ui.stopInfo:SetText("")
 			ui.stopStatus:SetText("")
 			ui.stopNote:SetText("Every bucket on the route has been visited. Happy Hallow's End!")
-			ui.hint:SetText("")
 		end
 		TR:UpdateDistance()
 	end
@@ -2815,6 +2817,9 @@ function TR:OpenSettings()
 		return
 	end
 	if Settings and Settings.OpenToCategory and settingsState.category then
+		-- the category object is Blizzard's; its GetID method is invisible to the
+		-- checker, which only sees the empty table we assigned into
+		---@diagnostic disable-next-line: undefined-field
 		Settings.OpenToCategory(settingsState.category:GetID())
 	elseif InterfaceOptionsFrame_OpenToCategory then
 		InterfaceOptionsFrame_OpenToCategory(settingsState.frame)
