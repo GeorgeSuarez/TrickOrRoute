@@ -2138,6 +2138,11 @@ local function BuildUI()
 			end)
 		end
 	end)
+	-- Selecting a region changes which radio is current. Without this, the
+	-- dropdown derives its new text from the description built *before* the
+	-- selection, so it keeps showing the old region until the menu is reopened.
+	-- Regenerating on response rebuilds the radios first, then the text.
+	dropdown:EnableRegenerateOnResponse(true)
 	ui.regionDropdown = dropdown
 
 	-- one row for the picker, then the stop card
