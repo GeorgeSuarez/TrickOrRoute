@@ -1,0 +1,90 @@
+# TrickOrRoute
+
+A World of Warcraft (retail) addon that walks you through an **efficient guided
+tour of every Hallow's End candy bucket** — roughly **281 stops** across 11
+travel phases, ordered to minimize backtracking, with automatic map waypoints.
+
+![icon](https://wow.zamimg.com/images/wow/icons/large/achievement_halloween_candy_01.jpg)
+
+## What it does
+
+- **Ordered route** — stops are grouped into phases that follow the portal
+  network (Eastern Kingdoms → Outland through the Dark Portal, Kalimdor via
+  Exodar/Caverns of Time portals, then Dalaran → Pandaria → Draenor → Broken
+  Isles → Dragon Isles → Khaz Algar → Midnight/Quel'Thalas).
+- **Server-truth completion tracking** — every candy bucket is a one-time
+  quest, so the addon checks real quest flags (`C_QuestLog`). No guessing.
+- **Auto-advance** — when you loot a `Handful of Treats`, turn in a bucket
+  quest, or simply fly within 40 yards of the current stop, the tour moves to
+  the next incomplete bucket automatically (toggleable).
+- **Waypoints** — one click sets the built-in map waypoint and supertracks it.
+  If you run **TomTom**, tick "Use TomTom" to place TomTom arrows instead.
+- **`/way` dump** — export every remaining stop as TomTom `/way #map x y`
+  lines (use the *Paste* addon to import them in bulk).
+- **Faction aware** — automatically shows only neutral + your faction's
+  buckets (Alliance ~199, Horde ~196).
+- **Handles the traps** — flags every **Zidormi-phased** bucket (Blasted
+  Lands, Undercity/Brill, Theramore, Teldrassil/Darnassus), the Tier 3
+  garrison requirement on Draenor, and the **Aldor/Scryer** inns in Outland.
+- **Per-character progress** (buckets are per-character) via
+  `SavedVariablesPerCharacter`.
+
+## Install
+
+1. Copy the `TrickOrRoute` folder into your
+   `World of Warcraft/_retail_/Interface/AddOns/` folder
+   (or unzip `TrickOrRoute.zip` there).
+2. Log in / `/reload`.
+3. Type **`/tor`** or click the candy-bucket minimap button.
+
+## Commands
+
+| Command | Effect |
+| --- | --- |
+| `/tor` | toggle the route window |
+| `/tor next` / `/tor prev` | browse stops |
+| `/tor wp` | set a waypoint on the current stop |
+| `/tor map` | open the world map at the current stop |
+| `/tor skip` | manually skip the current stop (e.g. rep-gated inns) |
+| `/tor list` | print remaining stops as TomTom `/way` lines |
+| `/tor auto` | toggle auto-advance |
+| `/tor tomtom` | toggle TomTom integration |
+| `/tor unskip` | clear manual skips |
+| `/tor reset` | wipe saved settings |
+
+## The route at a glance
+
+1. **Eastern Kingdoms** — start Stormwind (A) or Silvermoon (H), loop south,
+   up the coast, and finish in Twilight Highlands
+2. **Outland** — in through the Dark Portal, loop, back out
+3. **Kalimdor** — Exodar islands (A) / Orgrimmar (H), then the big clockwise loop
+4. **Deepholm & Vashj'ir** — Cataclysm portals (bring water breathing!)
+5. **Northrend** — portal to Dalaran, clockwise loop
+6. **Pandaria** — portal to the Jade Forest, clockwise loop
+7. **Draenor** — Garrison Hearthstone (Tier 3 garrison)
+8. **Broken Isles** — Dalaran Hearthstone
+9. **Dragon Isles** — portal to Valdrakken
+10. **Khaz Algar** — portal to Dornogal
+11. **Midnight** — portal to Silvermoon; Eversong, Zul'Aman, Harandar, Voidstorm
+
+## Data & credits
+
+Bucket positions and quest IDs are sourced from the actively-maintained
+[CandyBuckets](https://github.com/Vladinator/wow-addon-candybuckets) community
+dataset (v12.1.0, Hallow's End 2026) and cross-checked against Wowhead's
+Hallow's End guide and achievement-comment waypoints. `RouteData.lua` is
+generated — don't edit it by hand.
+
+## Known caveats
+
+- A handful of stops ship generic labels/positions because upstream data is
+  ambiguous (`Candy Bucket (unverified position)` in Eastern Kingdoms, one
+  Alliance inn in Krasarang, one inn on the Veiled Stair road). The in-game
+  zone name always displays correctly.
+- A few inns that existed in earlier years (Light's Hope Chapel, Stormfeather
+  Outpost, Eastpoint Tower has moved, the Shrines of Seven Stars / Two Moons)
+  are absent because they are no longer lootable in the current client.
+- Built for retail (Interface 120100). Classic clients are not supported
+  (different bucket quest IDs).
+
+Have a spooky, efficient Hallow's End! 🎃

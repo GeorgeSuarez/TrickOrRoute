@@ -1,0 +1,10 @@
+## Interface: 120100
+## Title: TrickOrRoute
+## Notes: An efficient guided tour of every Hallow's End candy bucket, with auto waypoints.
+## Author: TrickOrRoute
+## Version: 1.0.0
+## IconTexture: Interface\Icons\Achievement_Halloween_Candy_01
+## SavedVariablesPerCharacter: TrickOrRouteCharDB
+
+RouteData.lua
+Main.lua
