@@ -3,6 +3,9 @@
 -- dataset (github.com/Vladinator/wow-addon-candybuckets, v12.1.0) and
 -- cross-checked against Wowhead Hallow's End guide waypoints.
 -- Do not edit by hand; regenerate instead.
+-- 2026-10-19 QA: Northrend labels (Warsong/Bor'gorok, Tunka'lo/Grom'arsh)
+-- were swapped relative to their quest IDs; fixed by cross-checking
+-- quest IDs against HandyNotes_HallowsEnd and wow-pro's Hallow's End guide.
 
 local D = {}
 
@@ -165,9 +168,9 @@ D.regions = {
 			{ q=13474, side=2, map=125, x=66.6, y=30.1, label="Dalaran - Sunreaver's Sanctuary", zone="Dalaran" },
 			{ q=13436, side=1, map=114, x=58.5, y=67.9, label="Valiance Keep", zone="Borean Tundra" },
 			{ q=13437, side=1, map=114, x=57.1, y=18.8, label="Fizzcrank Airstrip", zone="Borean Tundra" },
-			{ q=13501, side=2, map=114, x=49.7, y=10.0, label="Warsong Hold", zone="Borean Tundra" },
+			{ q=13501, side=2, map=114, x=49.7, y=10.0, label="Bor'gorok Outpost", zone="Borean Tundra" },
 			{ q=13467, side=2, map=114, x=76.7, y=37.4, label="Taunka'le Village", zone="Borean Tundra" },
-			{ q=13468, side=2, map=114, x=41.8, y=54.4, label="Bor'gorok Outpost", zone="Borean Tundra" },
+			{ q=13468, side=2, map=114, x=41.8, y=54.4, label="Warsong Hold", zone="Borean Tundra" },
 			{ q=13460, side=3, map=114, x=78.4, y=49.2, label="Unu'pe", zone="Borean Tundra" },
 			{ q=13438, side=1, map=115, x=29.0, y=56.2, label="Stars' Rest", zone="Dragonblight" },
 			{ q=13456, side=3, map=115, x=60.1, y=53.5, label="Wyrmrest Temple", zone="Dragonblight" },
@@ -185,8 +188,8 @@ D.regions = {
 			{ q=13461, side=3, map=120, x=41.1, y=85.9, label="K3", zone="The Storm Peaks" },
 			{ q=13462, side=3, map=120, x=30.9, y=37.2, label="Bouldercrag's Refuge", zone="The Storm Peaks" },
 			{ q=13448, side=1, map=120, x=28.7, y=74.3, label="Frosthold", zone="The Storm Peaks" },
-			{ q=13471, side=2, map=120, x=67.6, y=50.6, label="Grom'arsh Crash Site", zone="The Storm Peaks" },
-			{ q=13548, side=2, map=120, x=37.1, y=49.6, label="Camp Tunka'lo", zone="The Storm Peaks" },
+			{ q=13471, side=2, map=120, x=67.6, y=50.6, label="Camp Tunka'lo", zone="The Storm Peaks" },
+			{ q=13548, side=2, map=120, x=37.1, y=49.6, label="Grom'arsh Crash Site", zone="The Storm Peaks" },
 			{ q=13452, side=3, map=117, x=25.4, y=59.8, label="Kamagua", zone="Howling Fjord" },
 			{ q=13435, side=1, map=117, x=60.5, y=15.9, label="Fort Wildervar", zone="Howling Fjord" },
 			{ q=13434, side=1, map=117, x=30.8, y=41.5, label="Westguard Keep", zone="Howling Fjord" },
