@@ -1225,7 +1225,7 @@ end
 local function MakeHud()
 	if TR.hud then return TR.hud end
 	local hud = CreateFrame("Button", "TrickOrRouteHUD", UIParent, "BackdropTemplate")
-	hud:SetSize(300, 32)
+	hud:SetSize(360, 32)
 	hud:SetPoint("TOP", Minimap, "BOTTOM", 0, -6)
 	hud:SetMovable(true)
 	hud:EnableMouse(true)
@@ -1275,7 +1275,6 @@ local function MakeHud()
 
 	local name = hud:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 	name:SetPoint("LEFT", icon, "RIGHT", 6, 0)
-	name:SetPoint("RIGHT", hud, "RIGHT", -90, 0)
 	name:SetJustifyH("LEFT")
 	name:SetWordWrap(false)
 
@@ -1283,7 +1282,14 @@ local function MakeHud()
 	dist:SetPoint("RIGHT", hud, "RIGHT", -8, 0)
 	dist:SetJustifyH("RIGHT")
 
-	hud.arrow, hud.icon, hud.name, hud.dist = arrow, icon, name, dist
+	-- Tricky Treats, on the tracker too: the icon plus the live bag count.
+	local treats = hud:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+	treats:SetPoint("RIGHT", dist, "LEFT", -10, 0)
+	treats:SetJustifyH("RIGHT")
+	-- The stop name gets whatever room is left before the treat counter.
+	name:SetPoint("RIGHT", treats, "LEFT", -10, 0)
+
+	hud.arrow, hud.icon, hud.name, hud.dist, hud.treats = arrow, icon, name, dist, treats
 
 	hud:SetScript("OnClick", function(_, button)
 		if button == "RightButton" then
@@ -1310,6 +1316,7 @@ local function MakeHud()
 	hud:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
 	TR.hud = hud
+	if TR.UpdateTreatCounters then TR:UpdateTreatCounters() end
 	return hud
 end
 
@@ -1347,6 +1354,7 @@ function TR:UpdateHud()
 	end
 	hud:Show()
 	TR:UpdateArrows()
+	if TR.UpdateTreatCounters then TR:UpdateTreatCounters() end
 end
 
 -- Point the arrow textures at the current stop. Called often while visible, so it
@@ -2288,26 +2296,33 @@ local function BuildUI()
 	footer:SetPoint("BOTTOMLEFT", 12, 11)
 	ui.footer = footer
 
-	-- Paint the footer's treat count. RefreshUI calls this; the BAG_UPDATE hook
-	-- calls it directly (see below) so looting updates the number without a
-	-- full repaint. The count is remembered so the hook can skip no-op repaints.
+	-- Paint the Tricky Treats count in both places it is wanted: the full
+	-- window's footer and the mini tracker. RefreshUI and UpdateHud call this;
+	-- the BAG_UPDATE hook calls it directly (see below) so looting updates the
+	-- numbers without a full repaint. The count is remembered so the hook can
+	-- skip no-op repaints.
 	local lastTreats
-	function TR:UpdateTreatFooter()
+	function TR:UpdateTreatCounters()
 		local treats = TreatCount(TRICKY_TREAT_ITEM_ID)
 		lastTreats = treats
 		local icon = TreatIcon(TRICKY_TREAT_ITEM_ID)
 		local iconTag = icon and ("|T" .. icon .. ":15:15:0:0|t") or ""
 		local suffix = TR.db.autoAdvance and "" or "  |cff808080(auto-advance off)|r"
 		footer:SetText(string.format("%s Tricky Treats: %d%s", iconTag, treats, suffix))
+		if TR.hud and TR.hud.treats then
+			TR.hud.treats:SetText(string.format("%s %d", iconTag, treats))
+		end
 	end
 
 	-- BAG_UPDATE fires for every bag change (looting, buying, crafting), so the
 	-- handler stays as cheap as one item count and a comparison; it only paints
-	-- when the number actually moved and the window is up to see it.
+	-- when the number actually moved and one of the counters is visible.
 	TR.treatWatcher = function()
-		if not (TR.ui and TR.ui.footer and TR.ui.footer:IsShown()) then return end
+		local windowShown = TR.ui and TR.ui.footer and TR.ui.footer:IsShown()
+		local hudShown = TR.hud and TR.hud:IsShown() and TR.hud.treats ~= nil
+		if not (windowShown or hudShown) then return end
 		local treats = TreatCount(TRICKY_TREAT_ITEM_ID)
-		if treats ~= lastTreats then TR:UpdateTreatFooter() end
+		if treats ~= lastTreats then TR:UpdateTreatCounters() end
 	end
 
 	-- list view
@@ -2482,7 +2497,7 @@ function TR:RefreshUI()
 	for _, plate in ipairs(ui.checkboxPlates or {}) do
 		plate:SetShown(not minimized)
 	end
-	ui.footer:SetShown(not minimized)
+	ui.footer:SetShown(true) -- stays visible when minimized
 
 	if showList then
 		BuildList()
@@ -2507,7 +2522,7 @@ function TR:RefreshUI()
 	end
 
 	-- footer: treat count with the candy icon
-	TR:UpdateTreatFooter()
+	TR:UpdateTreatCounters()
 
 	-- refresh the region picker's selection text and its green/gold labels
 	if ui.regionDropdown and not minimized and not ui.regionDropdown:IsMenuOpen() then

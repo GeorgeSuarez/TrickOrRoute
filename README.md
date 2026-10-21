@@ -47,11 +47,11 @@ doesn't zig-zag between inns.
   region dropdown that names the current region and greens out finished ones,
   action tooltips, and a checklist view with per-region "N left" counts, foldable
   region sections, and a minimize button that collapses the window to a compact
-  toolbar.
+  toolbar while keeping the Tricky Treats counter visible.
 - **Mini tracker HUD** — a compact, draggable bar under the minimap always shows
-  the next stop, a live direction arrow and distance (left-click sets the
-  waypoint, right-click opens the window), so you don't have to keep the main
-  window open while flying.
+  the next stop, a live direction arrow and distance, and the Tricky Treats
+  count (left-click sets the waypoint, right-click opens the window), so you
+  don't have to keep the main window open while flying.
 - **Direction arrow** — both the mini tracker and the stop card point at the
   next bucket relative to where your character is facing, and turn green when
   you're inside the auto-advance radius. (Same idea as Mapzeroth's navigator.)
